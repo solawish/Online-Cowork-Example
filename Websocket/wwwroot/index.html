@@ -101,12 +101,13 @@
             if (!socket || socket.readyState !== WebSocket.OPEN) {
                 alert("socket not connected");
             }
-            var data = sendMessage.value;
-            socket.send("3" + data);
+            var data = {};
+            data["Message"] = sendMessage.value;
+            socket.send("3" + JSON.stringify(data));
             commsLog.innerHTML += '<tr>' +
                 '<td class="commslog-client">Client</td>' +
                 '<td class="commslog-server">Server</td>' +
-                '<td class="commslog-data">' + htmlEscape(data) + '</td></tr>';
+                '<td class="commslog-data">' + htmlEscape(data.Message) + '</td></tr>';
         };
 
         window.onload = function () {
@@ -130,7 +131,7 @@
 
                 let logData = "";
                 if (event.data.substr(0, 1) == "2") {
-                    logData = event.data.substr(1);
+                    logData = JSON.parse(event.data.substr(1)).Message;
                     sendMessage.value = logData;
                 }
                 else {

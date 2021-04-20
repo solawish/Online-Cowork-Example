@@ -3,9 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Websocket.Common;
+using Websocket.Models;
 
 namespace Websocket.Service
 {
@@ -80,9 +82,9 @@ namespace Websocket.Service
         /// <param name="result">The result.</param>
         public async Task GetValue(WebSocket webSocket, WebSocketReceiveResult result)
         {
-            var data = _fakeStorageValue;
+            var data = new MessageModel { Message = _fakeStorageValue };
 
-            var buffer = Encoding.UTF8.GetBytes($"{(int)CommandEnum.Get}{data}");
+            var buffer = Encoding.UTF8.GetBytes($"{(int)CommandEnum.Get}{JsonSerializer.Serialize(data)}");
 
             await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, buffer.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
@@ -95,15 +97,19 @@ namespace Websocket.Service
         /// <param name="data">The data.</param>
         public async Task SetValue(WebSocket webSocket, WebSocketReceiveResult result, string data)
         {
-            _fakeStorageValue = data.Substring(1);
+            _fakeStorageValue = JsonSerializer.Deserialize<MessageModel>(data.Substring(1)).Message;
 
             var buffer = Encoding.UTF8.GetBytes($"{(int)CommandEnum.Set}");
 
             await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, buffer.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
 
-            await this.Broadcast(Encoding.UTF8.GetBytes($"{(int)CommandEnum.Get}{_fakeStorageValue}"));
+            await this.Broadcast(Encoding.UTF8.GetBytes($"{(int)CommandEnum.Get}{JsonSerializer.Serialize(new MessageModel { Message = _fakeStorageValue })}"));
         }
 
+        /// <summary>
+        /// Broadcasts Message To All Client.
+        /// </summary>
+        /// <param name="buffer">The buffer.</param>
         public async Task Broadcast(byte[] buffer)
         {
             foreach (var socket in _clients)
