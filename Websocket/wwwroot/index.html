@@ -22,6 +22,7 @@
             color: white
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </head>
 <body>
     <h1>WebSocket Sample Application</h1>
@@ -97,18 +98,7 @@
         //    socket.close(1000, "Closing from client");
         //};
 
-        sendButton.onclick = function () {
-            if (!socket || socket.readyState !== WebSocket.OPEN) {
-                alert("socket not connected");
-            }
-            var data = {};
-            data["Message"] = sendMessage.value;
-            socket.send("3" + JSON.stringify(data));
-            commsLog.innerHTML += '<tr>' +
-                '<td class="commslog-client">Client</td>' +
-                '<td class="commslog-server">Server</td>' +
-                '<td class="commslog-data">' + htmlEscape(data.Message) + '</td></tr>';
-        };
+        sendButton.onclick = Send;
 
         window.onload = function () {
             stateLabel.innerHTML = "Connecting";
@@ -147,6 +137,8 @@
             setTimeout(function () {
                 GetCurrentData();
             }, 1000);
+
+            $('#sendMessage').keyup(debounce(Send));
         };
 
         function htmlEscape(str) {
@@ -160,6 +152,34 @@
 
         function GetCurrentData() {
             socket.send("2");
+        }
+
+        function Send() {
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                alert("socket not connected");
+                return;
+            }
+            var data = {};
+            data["Message"] = sendMessage.value;
+            socket.send("3" + JSON.stringify(data));
+            commsLog.innerHTML += '<tr>' +
+                '<td class="commslog-client">Client</td>' +
+                '<td class="commslog-server">Server</td>' +
+                '<td class="commslog-data">' + htmlEscape(data.Message) + '</td></tr>';
+        }
+
+        function debounce(func, delay = 1000) {
+            let timer = null;
+
+            return () => {
+                let context = this;
+                let args = arguments;
+
+                clearTimeout(timer);
+                timer = setTimeout(() => {
+                    func.apply(context, args);
+                }, delay)
+            }
         }
     </script>
 </body>
