@@ -37,6 +37,8 @@
         <textarea id="sendMessage" rows="4" cols="50"></textarea>
     </div>
 
+    <p id="onlineLabel">0 peolple Online</p>
+
     <h2>Communication Log</h2>
     <table style="width: 800px">
         <thead>
@@ -55,6 +57,7 @@
         var stateLabel = document.getElementById("stateLabel");
         var sendMessage = document.getElementById("sendMessage");
         var commsLog = document.getElementById("commsLog");
+        var onlineLabel = document.getElementById("onlineLabel");
         var socket;
 
         var scheme = document.location.protocol === "https:" ? "wss" : "ws";
@@ -110,8 +113,13 @@
 
                 let logData = "";
                 if (event.data.substr(0, 1) == "2") {
+                    //received message
                     logData = JSON.parse(event.data.substr(1)).Message;
                     sendMessage.value = logData;
+                }
+                else if (event.data.substr(0, 1) == "4") {
+                    //reveiced online count
+                    onlineLabel.innerHTML = JSON.parse(event.data.substr(1)).OnlineCount + ' peolple Online';
                 }
                 else {
                     logData = event.data;

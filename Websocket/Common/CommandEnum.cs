@@ -3,7 +3,9 @@
     public enum CommandEnum
     {
         Echo = 1,
-        Get = 2,
-        Set = 3
+        GetValue = 2,
+        SetValue = 3,
+
+        GetOnlineCount = 4
     }
 }

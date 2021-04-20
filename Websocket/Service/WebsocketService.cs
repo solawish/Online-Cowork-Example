@@ -35,17 +35,19 @@ namespace Websocket.Service
             var clientId = Guid.NewGuid().ToString();
             _clients.TryAdd(clientId, webSocket);
 
+            await this.BroadcastOnlineCount();
+
             while (!result.CloseStatus.HasValue)
             {
                 string data = Encoding.UTF8.GetString(buffer, 0, result.Count).TrimEnd('\0');
                 string type = data.Substring(0, 1);
 
-                if (type == ((int)CommandEnum.Get).ToString())
+                if (type == ((int)CommandEnum.GetValue).ToString())
                 {
                     //Get Current Value
                     await GetValue(webSocket, result);
                 }
-                else if (type == ((int)CommandEnum.Set).ToString())
+                else if (type == ((int)CommandEnum.SetValue).ToString())
                 {
                     //Set Current Value
                     await SetValue(webSocket, result, data);
@@ -61,6 +63,8 @@ namespace Websocket.Service
 
             _clients.Remove(clientId);
             await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
+
+            await this.BroadcastOnlineCount();
             webSocket.Dispose();
         }
 
@@ -84,7 +88,7 @@ namespace Websocket.Service
         {
             var data = new MessageModel { Message = _fakeStorageValue };
 
-            var buffer = Encoding.UTF8.GetBytes($"{(int)CommandEnum.Get}{JsonSerializer.Serialize(data)}");
+            var buffer = Encoding.UTF8.GetBytes($"{(int)CommandEnum.GetValue}{JsonSerializer.Serialize(data)}");
 
             await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, buffer.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
@@ -99,11 +103,11 @@ namespace Websocket.Service
         {
             _fakeStorageValue = JsonSerializer.Deserialize<MessageModel>(data.Substring(1)).Message;
 
-            var buffer = Encoding.UTF8.GetBytes($"{(int)CommandEnum.Set}");
+            var buffer = Encoding.UTF8.GetBytes($"{(int)CommandEnum.SetValue}");
 
             await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, buffer.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
 
-            await this.Broadcast(Encoding.UTF8.GetBytes($"{(int)CommandEnum.Get}{JsonSerializer.Serialize(new MessageModel { Message = _fakeStorageValue })}"));
+            await this.Broadcast(Encoding.UTF8.GetBytes($"{(int)CommandEnum.GetValue}{JsonSerializer.Serialize(new MessageModel { Message = _fakeStorageValue })}"));
         }
 
         /// <summary>
@@ -121,6 +125,13 @@ namespace Websocket.Service
 
                 await socket.Value.SendAsync(new ArraySegment<byte>(buffer, 0, buffer.Length), WebSocketMessageType.Text, true, CancellationToken.None);
             }
+        }
+
+        public async Task BroadcastOnlineCount()
+        {
+            var buffer = Encoding.UTF8.GetBytes($"{(int)CommandEnum.GetOnlineCount}{JsonSerializer.Serialize(new OnlineCountModel { OnlineCount = _clients.Count })}");
+
+            await this.Broadcast(buffer);
         }
     }
 }
