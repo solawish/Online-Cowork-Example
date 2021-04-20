@@ -127,6 +127,10 @@ namespace Websocket.Service
             }
         }
 
+        /// <summary>
+        /// Broadcasts the online count.
+        /// </summary>
+        /// <returns></returns>
         public async Task BroadcastOnlineCount()
         {
             var buffer = Encoding.UTF8.GetBytes($"{(int)CommandEnum.GetOnlineCount}{JsonSerializer.Serialize(new OnlineCountModel { OnlineCount = _clients.Count })}");

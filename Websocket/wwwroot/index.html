@@ -35,6 +35,7 @@
     <div>
         <label for="sendMessage">Message to send:</label>
         <textarea id="sendMessage" rows="4" cols="50"></textarea>
+        <p id="autoSaveLabel"></p>
     </div>
 
     <p id="onlineLabel">0 peolple Online</p>
@@ -58,6 +59,7 @@
         var sendMessage = document.getElementById("sendMessage");
         var commsLog = document.getElementById("commsLog");
         var onlineLabel = document.getElementById("onlineLabel");
+        var autoSaveLabel = document.getElementById("autoSaveLabel");
         var socket;
 
         var scheme = document.location.protocol === "https:" ? "wss" : "ws";
@@ -163,6 +165,13 @@
                 '<td class="commslog-client">Client</td>' +
                 '<td class="commslog-server">Server</td>' +
                 '<td class="commslog-data">' + htmlEscape(data.Message) + '</td></tr>';
+
+
+            autoSaveLabel.innerHTML = "Auto Saved Complete!";
+
+            setTimeout(function () {
+                autoSaveLabel.innerHTML = "";
+            }, 2000);
         }
 
         function debounce(func, delay = 1000) {
