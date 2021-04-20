@@ -22,10 +22,10 @@
             color: white
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="./js/jquery.min.js"></script>
 </head>
 <body>
-    <h1>WebSocket Sample Application</h1>
+    <h1>WebSocket Cowork Edit Application</h1>
     <p id="stateLabel">Ready to connect...</p>
     <div>
         <label for="connectionUrl">WebSocket Server URL:</label>
@@ -34,8 +34,7 @@
     <p></p>
     <div>
         <label for="sendMessage">Message to send:</label>
-        <textarea id="sendMessage"></textarea>
-        <button id="sendButton" type="submit">Send</button>
+        <textarea id="sendMessage" rows="4" cols="50"></textarea>
     </div>
 
     <h2>Communication Log</h2>
@@ -55,7 +54,6 @@
         var connectionUrl = document.getElementById("connectionUrl");
         var stateLabel = document.getElementById("stateLabel");
         var sendMessage = document.getElementById("sendMessage");
-        var sendButton = document.getElementById("sendButton");
         var commsLog = document.getElementById("commsLog");
         var socket;
 
@@ -90,15 +88,6 @@
                 }
             }
         }
-
-        //closeButton.onclick = function () {
-        //    if (!socket || socket.readyState !== WebSocket.OPEN) {
-        //        alert("socket not connected");
-        //    }
-        //    socket.close(1000, "Closing from client");
-        //};
-
-        sendButton.onclick = Send;
 
         window.onload = function () {
             stateLabel.innerHTML = "Connecting";
@@ -136,7 +125,7 @@
 
             setTimeout(function () {
                 GetCurrentData();
-            }, 1000);
+            }, 500);
 
             $('#sendMessage').keyup(debounce(Send));
         };
